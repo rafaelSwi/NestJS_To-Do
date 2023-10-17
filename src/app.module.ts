@@ -7,7 +7,6 @@ import { Task } from './tasks/entities/task.entity';
 
 @Module({
   imports: [
-    TasksModule,
     TypeOrmModule.forRoot({
       type: 'postgres',
       host: 'localhost',
@@ -18,8 +17,10 @@ import { Task } from './tasks/entities/task.entity';
       database: 'rafael',
       synchronize: true,
       logging: true
-    })
+    }),
+    TasksModule,
   ],
+  exports: [],
   controllers: [AppController],
   providers: [AppService],
 })

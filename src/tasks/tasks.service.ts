@@ -1,8 +1,16 @@
 import { Injectable } from '@nestjs/common';
 import { Task } from './entities/task.entity';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class TasksService {
+
+constructor (
+    @InjectRepository(Task)
+    private taskRepository: Repository<Task>,
+) {}
+
     private tasks: Task[] = [
         {
             id: 123_555,
@@ -10,7 +18,7 @@ export class TasksService {
             description: "Descrição de Teste",
             date: `${Date.now()}`,
             priority: 0,
-            status: "in progress"
+            status: "standby"
         },
     ];
 
@@ -23,11 +31,13 @@ export class TasksService {
     }
 
     findAll() {
-        return this.tasks;
+        return this.taskRepository.find();
     }
 
     findOne(id: string) {
-        return this.tasks.find((task: Task) => task.id === Number(id));
+        const taskId = parseInt(id, 10);
+        const result = this.taskRepository.findBy({ id: taskId });
+        return result;
     }
 
     generateId(): number {
@@ -41,17 +51,17 @@ export class TasksService {
     create(createTaskDto: any) {
         const cache_task: Task = createTaskDto;
         cache_task.id = this.generateId()
-        this.tasks.push(cache_task);
+        cache_task.status = "standby";
+        return this.taskRepository.save(cache_task);
         console.log(`New Task Created. ID: ${cache_task.id}`);
     }
 
     update(id: string, updateTaskDto: any) {
-        const indexTask = this.tasks.findIndex(
-            task => task.id === Number(id),
-        );
-
-        this.tasks[indexTask] = updateTaskDto;
-        console.log(`Task Updated. ID: ${updateTaskDto.id}`);
+        const taskId = parseInt(id, 10);
+        return this.taskRepository.update(
+            { id: taskId },
+            updateTaskDto
+            )
     }
 
     remove(id: string) {
