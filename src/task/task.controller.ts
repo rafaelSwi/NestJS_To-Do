@@ -41,9 +41,8 @@ export class TaskController {
 
     @Delete(':id')
     remove(@Param('id') id: string) {
-        
         if (this.tasksService.doesItExist(id) == true) {
-            this.remove(id);
+            this.tasksService.remove(id);
         } else {
             throw new HttpException(`Task ${id} not found`, HttpStatus.NOT_FOUND);
         }
@@ -51,3 +50,13 @@ export class TaskController {
     }
 
 }
+
+/*
+EXEMPLO DE POST REQUEST:
+{
+    "title": "Arrumar o Quarto",
+    "description": "Lembrar de Limpar as Gavetas",
+    "date": "2023-10-21",
+    "priority": 2
+}
+*/
