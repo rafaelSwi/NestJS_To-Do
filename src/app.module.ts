@@ -10,7 +10,7 @@ import { Task } from './tasks/entities/task.entity';
     TypeOrmModule.forRoot({
       type: 'postgres',
       host: 'localhost',
-      port: 5432,
+      port: 5433,
       password: 'admin',
       username: 'postgres',
       entities: [Task],

@@ -1,40 +1,61 @@
 <template>
-    <div>
-      <div v-for="task in tasks" :key="task.title" class="task">
-        <div class="task-details">
-          <strong>{{ task.title }}</strong>
-          <p>{{ task.desc }}</p>
-          <p class="priority">Prioridade: {{ pText(task.priority) }}</p>
-        </div>
-        <button @click="completeTask(task)" class="complete-button">Marcar como Concluído</button>
+  <div>
+    <div v-for="task in tasks" :key="task.id" class="task">
+      <div class="task-details">
+        <strong>{{ task.title }}</strong>
+        <p>{{ task.desc }}</p>
+        <p class="priority">Prioridade: {{ pText(task.priority) }}</p>
       </div>
+      <button @click="completeTask(task.id)" class="complete-button">Marcar como Concluído</button>
     </div>
-  </template>
-  
-  <script>
-  export default {
-    props: {
-      tasks: Array,
-    },
-    methods: {
-      completeTask(task) {
-        this.$emit("task-completed", task);
-      },
-      pText(value) {
-        switch (value) {
-            case 1:
-            return "Alta";
-            case 2:
-            return "Normal";
-            case 3:
-            return "Baixa";
-            default:
-            return "Não definido";
+  </div>
+</template>
+
+<script>
+import axios from "axios";
+
+export default {
+  data() {
+    return {
+      tasks: [],
+    };
+  },
+  created() {
+    this.fetchTasks();
+  },
+  methods: {
+    async fetchTasks() {
+      try {
+        const response = await axios.get("http://127.0.0.1:3000/tasks");
+        this.tasks = response.data;
+        console.log(response.data)
+      } catch (error) {
+        console.error("Error:", error);
       }
     },
+    async completeTask(taskId) {
+      try {
+        await axios.delete(`http://127.0.0.1:3000/tasks/${taskId}`);
+        this.tasks = this.tasks.filter((task) => task.id !== taskId);
+      } catch (error) {
+        console.error("Error:", error);
+      }
     },
-  };
-  </script>
+    pText(value) {
+      switch (value) {
+        case 1:
+          return "Alta";
+        case 2:
+          return "Normal";
+        case 3:
+          return "Baixa";
+        default:
+          return "Não definido";
+      }
+    },
+  },
+};
+</script>
   
   <style scoped>
   .task {

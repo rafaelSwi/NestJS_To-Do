@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, HttpStatus, HttpException } from '@nestjs/common';
 import { Task } from './entities/task.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -41,19 +41,15 @@ constructor (
     }
 
     generateId(): number {
-        let id = (Math.floor(Math.random() * (100_000_000 - 100 + 1)) + 100);
-        while (this.doesItExist(`${id}`) == true) {
-            id = (Math.floor(Math.random() * (100_000_000 - 100 + 1)) + 100);
-        }
-        return id;
+        return Math.floor(Math.random() * 5_000_000);
     }
 
     create(createTaskDto: any) {
         const cache_task: Task = createTaskDto;
         cache_task.id = this.generateId()
         cache_task.status = "standby";
-        return this.taskRepository.save(cache_task);
         console.log(`New Task Created. ID: ${cache_task.id}`);
+        return this.taskRepository.save(cache_task);
     }
 
     update(id: string, updateTaskDto: any) {
@@ -64,14 +60,13 @@ constructor (
             )
     }
 
-    remove(id: string) {
-        const indexTask = this.tasks.findIndex(
-            task => task.id === Number(id),
-        );
-        if (indexTask >= 0) {
-            this.tasks.splice(indexTask, 0);
+    async remove(id: string) {
+        const taskToRemove = await this.findOne(id);
+        if (!taskToRemove) {
+            throw new HttpException(`Task with ID ${id} not found`, HttpStatus.NOT_FOUND);
         }
-        console.log(`Task Removed. ID: ${id}`);
+        return this.taskRepository.remove(taskToRemove);
     }
+    
 
 }

@@ -22,6 +22,7 @@
 
 <script>
 import Task from "@/components/Task";
+import axios from "axios";
 
 export default {
   data() {
@@ -32,13 +33,34 @@ export default {
     };
   },
   methods: {
-    addTask() {
-      this.title = this.title.slice(0, 30);
-      this.desc = this.desc.slice(0, 50);
-      this.$emit("task-added", new Task(this.title, this.desc, +this.priority));
-      this.title = '';
-      this.desc = '';
-      this.priority = '1';
+    async addTask() {
+
+      if (this.title == "") {
+        return null
+      }
+
+      const titulo = this.title.slice(0, 30);
+      const descricao = this.desc.slice(0, 50);
+      const newTask = new Task(titulo, descricao, this.priority);
+
+      try {
+
+        await axios.post("http://127.0.0.1:3000/tasks", {
+          title: newTask.title,
+          description: newTask.desc,
+          date: new Date(),
+          priority: parseInt(newTask.priority),
+        });
+
+        this.$emit("task-added", newTask);
+
+        this.title = '';
+        this.desc = '';
+        this.priority = '1';
+        location.reload()
+      } catch (error) {
+        console.error("Error:", error);
+      }
     },
   },
 };
